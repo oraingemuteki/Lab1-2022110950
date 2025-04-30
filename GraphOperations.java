@@ -266,8 +266,8 @@ public class GraphOperations {
                     }
                 }
     
-                // 处理出度为0的节点的贡献：均分给其他节点（numNodes -1）
-                if (numNodes > 1) { // 避免除以0
+                // 处理出度为0的节点的贡献：均分给其他节点
+                if (numNodes > 1) { 
                     sum += sumDanglingPR / numNodes;
                 }
     
