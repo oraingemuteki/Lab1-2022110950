@@ -1,2 +1,2 @@
-C4 modifications for file2.txt
-C4 modifications for file2
+B2 modifications for file2
+
