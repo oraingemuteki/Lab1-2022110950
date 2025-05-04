@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-C4 modifications for file2.txt
-=======
-C4 modifications for file2
->>>>>>> C4
+2022110950 modifications for file2
