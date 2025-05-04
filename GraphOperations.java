@@ -322,6 +322,8 @@ public class GraphOperations {
             currentNode = nextNode;
         }
         
+        writeVisitedNodesToFile(visitedNodes);
+
         return String.join(" -> ", visitedNodes); // 返回遍历路径
     }
 }
