@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class MainApp {
@@ -34,22 +37,60 @@ public class MainApp {
 
                 switch (choice) {
                     case 1:
-                        visualizer.visualizeGraph(graph);
+                        visualizer.showDirectedGraph(graph);
                         break;
                     case 2:
-                        operations.queryBridgeWords(scanner);
+                        System.out.println("请输入两个英文单词（用空格分隔）:");
+                        String input1 = scanner.nextLine();
+                        String[] words = input1.split("\\s+");
+                        if (words.length != 2) {
+                            System.out.println("输入格式错误");
+                        }
+                        String result = operations.queryBridgeWords(words[0], words[1]);
+                        System.out.println(result);
                         break;
                     case 3:
-                        operations.generateNewText(scanner);
+                        System.out.println("请输入一行新文本:");
+                        String input2 = scanner.nextLine();
+                        String generatedText = operations.generateNewText(input2);
+                        System.out.println("new text: " + generatedText);
                         break;
                     case 4:
-                        operations.calculateShortestPath(scanner);
+                        System.out.println("请输入一个或两个英文单词（用空格分隔）:");
+                        String pathInput = scanner.nextLine().trim();
+                        String[] pathWords = pathInput.split("\\s+");
+    
+                        String pathResult;
+                        if (pathWords.length == 1) {
+                            pathResult = operations.calcShortestPath(pathWords[0]);
+                        } else if (pathWords.length == 2) {
+                            pathResult = operations.calcShortestPath(pathWords[0], pathWords[1]);
+                        } else {
+                            pathResult = "输入格式错误";
+                        }
+                        System.out.println(pathResult);
                         break;
                     case 5:
-                        operations.calculatePageRank(scanner);
+                        System.out.println("请输入要查询的单词:");
+                        String word = scanner.nextLine();
+                        Double prValue = operations.calPageRank(word);
+                        if (prValue != null) {
+                            System.out.printf("%s 的PageRank值: %.6f%n", word, prValue);
+                        } else {
+                            System.out.println("单词不存在于图中");
+                        }
                         break;
                     case 6:
-                        operations.randomWalk(scanner);
+                        String walkPath = operations.randomWalk();
+                        System.out.println("随机游走路径: " + walkPath);
+    
+                        // 可选：保留原文件保存功能
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter("random_walk.txt"))) {
+                            writer.write(walkPath.replace(" -> ", " "));
+                            System.out.println("路径已保存至文件");
+                        } catch (IOException e) {
+                            System.err.println("保存失败: " + e.getMessage());
+                        }
                         break;
                     case 7:
                         visualizer.closeWindow();

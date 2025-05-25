@@ -24,21 +24,15 @@ public class GraphOperations {
         }
     }
 
-    public void queryBridgeWords(Scanner scanner) {
-        scanner = new Scanner(System.in);
-        System.out.println("请输入两个英文单词（用空格分隔）:");
-        String input = scanner.nextLine();
-        String[] words = input.split("\\s+");
-        if (words.length != 2) {
-            System.out.println("输入格式错误，请输入两个英文单词并用空格分隔。");
-            return;
-        }
-        String word1 = graph.normalizeWord(words[0]);
-        String word2 = graph.normalizeWord(words[1]);
+    public String queryBridgeWords(String word1, String word2) {
+
+        word1 = graph.normalizeWord(word1);
+        word2 = graph.normalizeWord(word2);
 
         if (!graph.getGraph().containsKey(word1) || !graph.getGraph().containsKey(word2)) {
-            System.out.printf("No %s or %s in the graph!%n", word1, word2);
-            return;
+            // System.out.printf("No %s or %s in the graph!%n", word1, word2);
+            String error = "单词 " + word1 + " 或 " + word2 + " 不在图中";
+            return error;
         }
 
         List<String> bridgeWords = new ArrayList<>();
@@ -52,16 +46,19 @@ public class GraphOperations {
 
         StringBuilder result;
         if (bridgeWords.isEmpty()) {
-            System.out.printf("No bridge words from %s to %s!%n", word1, word2);
+            // System.out.printf("No bridge words from %s to %s!%n", word1, word2);
+            String error = "No bridge words！";
+            return error;
         } else if (bridgeWords.size() == 1) {
-            result = new StringBuilder("The bridge words from " + word1 + " to " + word2 + " is: " + bridgeWords.get(0));
-            System.out.println(result.toString());
+            result = new StringBuilder("从 " + word1 + " 到 " + word2 + " 的桥接词为: " + bridgeWords.get(0));
+            // System.out.println(result.toString());
+            return result.toString();
         } else {
-            result = new StringBuilder("The bridge words from " + word1 + " to " + word2 + " are: ");
+            result = new StringBuilder("从 " + word1 + " 到 " + word2 + " 的桥接词为: ");
             for (int i = 0; i < bridgeWords.size(); i++) {
                 if (i > 0) {
                     if (i == bridgeWords.size() - 1) {
-                        result.append(" and ");
+                        result.append(" 和 ");
                     } else {
                         result.append(", ");
                     }
@@ -69,37 +66,35 @@ public class GraphOperations {
                 result.append(bridgeWords.get(i));
             }
             result.append(".");
-            System.out.println(result.toString());
+            // System.out.println(result.toString());
+            return result.toString();
         }
     }
 
-    public void generateNewText(Scanner scanner) {
-        scanner = new Scanner(System.in);
-        System.out.println("请输入一行新文本:");
-        String input = scanner.nextLine();
-        String[] words = input.split("\\s+");
-
+    public String generateNewText(String inputText) {
+        if (inputText == null || inputText.trim().isEmpty()) {
+            return ""; 
+        }
+    
+        String[] words = inputText.split("\\s+");
         StringBuilder newText = new StringBuilder();
         Random random = new Random();
-
+    
         for (int i = 0; i < words.length; i++) {
             String current = graph.normalizeWord(words[i]);
             newText.append(words[i]);
-
+    
             if (i < words.length - 1) {
                 String next = graph.normalizeWord(words[i + 1]);
-                // 检查图中是否包含当前单词和下一个单词
                 if (graph.getGraph().containsKey(current) && graph.getGraph().containsKey(next)) {
                     List<String> bridgeWords = new ArrayList<>();
-                    // 遍历当前单词的所有邻居节点
                     for (String potentialBridge : graph.getGraph().get(current).keySet()) {
-                        // 检查该邻居节点是否有到下一个单词的边
-                        if (graph.getGraph().get(potentialBridge) != null && graph.getGraph().get(potentialBridge).containsKey(next)) {
+                        if (graph.getGraph().get(potentialBridge) != null && 
+                            graph.getGraph().get(potentialBridge).containsKey(next)) {
                             bridgeWords.add(potentialBridge);
                         }
                     }
                     if (!bridgeWords.isEmpty()) {
-                        // 如果找到桥接词，随机选择一个添加到新文本中
                         int randomIndex = random.nextInt(bridgeWords.size());
                         newText.append(" ").append(bridgeWords.get(randomIndex));
                     }
@@ -107,53 +102,51 @@ public class GraphOperations {
                 newText.append(" ");
             }
         }
-
-        System.out.println("生成的新文本: " + newText.toString());
+    
+        return newText.toString().trim(); // 移除末尾多余空格
     }
 
-    public void calculateShortestPath(Scanner scanner) {
-        scanner = new Scanner(System.in);
-        System.out.println("请输入一个或两个英文单词（用空格分隔）:");
-        String input = scanner.nextLine();
-        String[] words = input.split("\\s+");
-
-        if (words.length == 1) {
-            String startWord = graph.normalizeWord(words[0]);
-            if (!graph.getGraph().containsKey(startWord)) {
-                System.out.printf("No %s in the graph!%n", startWord);
-                return;
-            }
-            // 计算从起始单词到图中所有其他单词的最短路径
-            for (String endWord : graph.getGraph().keySet()) {
-                if (!endWord.equals(startWord)) {
-                    List<String> path = dijkstra(startWord, endWord);
-                    if (path != null) {
-                        int pathLength = calculatePathLength(path);
-                        System.out.printf("从 %s 到 %s 的最短路径: %s，路径长度: %d%n", startWord, endWord, String.join(" -> ", path), pathLength);
-                    } else {
-                        System.out.printf("从 %s 到 %s 不可达%n", startWord, endWord);
-                    }
-                }
-            }
-        } else if (words.length == 2) {
-            String startWord = graph.normalizeWord(words[0]);
-            String endWord = graph.normalizeWord(words[1]);
-            // 检查图中是否包含起始单词和结束单词
-            if (!graph.getGraph().containsKey(startWord) || !graph.getGraph().containsKey(endWord)) {
-                System.out.printf("No %s or %s in the graph!%n", startWord, endWord);
-                return;
-            }
+    public String calcShortestPath(String word1) {
+        String startWord = graph.normalizeWord(word1);
+        if (!graph.getGraph().containsKey(startWord)) {
+            return String.format("No '%s' in the graph!", startWord);
+        }
+    
+        StringBuilder result = new StringBuilder();
+        for (String endWord : graph.getGraph().keySet()) {
+            if (endWord.equals(startWord)) continue;
+            
             List<String> path = dijkstra(startWord, endWord);
             if (path != null) {
-                int pathLength = calculatePathLength(path);
-                System.out.printf("最短路径: %s，路径长度: %d%n", String.join(" -> ", path), pathLength);
-                visualizer.visualizeGraphWithPath(graph, path);
+                int length = calculatePathLength(path);
+                result.append(String.format("从 %s 到 %s: %s (长度: %d)\n",
+                          startWord, endWord, String.join(" -> ", path), length));
             } else {
-                System.out.printf("从 %s 到 %s 不可达%n", startWord, endWord);
+                result.append(String.format("\"%s 到 %s 没有路径\n", startWord, endWord));
             }
-        } else {
-            System.out.println("输入格式错误，请输入一个或两个英文单词并用空格分隔。");
         }
+        return result.toString().trim();
+    }
+    
+    public String calcShortestPath(String word1, String word2) {
+        String startWord = graph.normalizeWord(word1);
+        String endWord = graph.normalizeWord(word2);
+        
+        if (!graph.getGraph().containsKey(startWord)) {
+            return String.format("'%s' 不在图中\n", startWord);
+        }
+        if (!graph.getGraph().containsKey(endWord)) {
+            return String.format("'%s' 不在图中\n", endWord);
+        }
+    
+        List<String> path = dijkstra(startWord, endWord);
+        if (path == null) {
+            return String.format("%s 到 %s 没有路径\n", startWord, endWord);
+        }
+        
+        int length = calculatePathLength(path);
+        return String.format("Shortest path: %s (Length: %d)", 
+                String.join(" -> ", path), length);
     }
 
     private int calculatePathLength(List<String> path) {
@@ -225,68 +218,62 @@ public class GraphOperations {
         return path;
     }
 
-    public void calculatePageRank(Scanner scanner) {
+    public Double calPageRank(String word) {
+        // 参数预处理和验证
+        String normalizedWord = graph.normalizeWord(word);
+        if (!graph.getGraph().containsKey(normalizedWord)) {
+            return null; 
+        }
+    
+        // 保留原PageRank计算逻辑
         Map<String, Double> pageRank = new HashMap<>();
         int numNodes = graph.getGraph().size();
-        // 阻尼因子
         double dampingFactor = 0.85;
-        // 收敛阈值
         double tolerance = 0.0001;
-        // 初始 PageRank 值
         double initialPR = 1.0 / numNodes;
     
-        // 初始化PageRank值，使用TF-IDF作为初始PR值
+        // 初始化（使用TF-IDF值）
         for (String node : graph.getGraph().keySet()) {
-            double initialValue = tfidf.getOrDefault(node, initialPR);
-            pageRank.put(node, initialValue);
+            pageRank.put(node, tfidf.getOrDefault(node, initialPR));
         }
-        
-        boolean converged = false;
-        while (!converged) {
-            Map<String, Double> newPageRank = new HashMap<>();
-            double diff = 0.0;
     
-            // 计算所有出度为0的节点的总PR值
-            double sumDanglingPR = 0.0;
-            for (String node : graph.getGraph().keySet()) {
-                if (graph.getGraph().get(node).isEmpty()) {
-                    sumDanglingPR += pageRank.get(node);
-                }
-            }
+        // 迭代计算
+        boolean converged;
+        do {
+            converged = true;
+            Map<String, Double> newPageRank = new HashMap<>();
+            double danglingSum = pageRank.entrySet().stream()
+                .filter(e -> graph.getGraph().get(e.getKey()).isEmpty())
+                .mapToDouble(Map.Entry::getValue)
+                .sum();
     
             for (String node : graph.getGraph().keySet()) {
                 double sum = 0.0;
-                // 处理来自正常节点的贡献（有出边的节点）
+                // 计算来自其他节点的贡献
                 for (Map.Entry<String, Map<String, Integer>> entry : graph.getGraph().entrySet()) {
                     String source = entry.getKey();
-                    Map<String, Integer> neighbors = entry.getValue();
-                    if (neighbors.containsKey(node)) {
-                        int outDegree = neighbors.size();
+                    if (entry.getValue().containsKey(node)) {
+                        int outDegree = entry.getValue().size();
                         sum += pageRank.get(source) / outDegree;
                     }
                 }
-    
-                // 处理出度为0的节点的贡献：均分给其他节点
-                if (numNodes > 1) { 
-                    sum += sumDanglingPR / numNodes;
-                }
-    
-                double newPR = (1 - dampingFactor) / numNodes + dampingFactor * sum;
+                // 处理悬挂节点
+                sum += dampingFactor * danglingSum / numNodes;
+                
+                // 计算新PageRank值
+                double newPR = (1 - dampingFactor)/numNodes + dampingFactor * sum;
                 newPageRank.put(node, newPR);
-                diff += Math.abs(newPR - pageRank.get(node));
+                
+                // 检查收敛
+                if (Math.abs(newPR - pageRank.get(node)) > tolerance) {
+                    converged = false;
+                }
             }
-    
             pageRank = newPageRank;
-            if (diff < tolerance) {
-                converged = true;
-            }
-        }
+        } while (!converged);
     
-        // 输出PageRank值
-        System.out.println("PageRank值:");
-        for (Map.Entry<String, Double> entry : pageRank.entrySet()) {
-            System.out.printf("%s: %.6f%n", entry.getKey(), entry.getValue());
-        }
+        // 返回指定单词的PageRank值
+        return pageRank.get(normalizedWord);
     }
 
     private void writeVisitedNodesToFile(List<String> visitedNodes) {
@@ -298,44 +285,45 @@ public class GraphOperations {
         }
     }
 
-    public void randomWalk(Scanner scanner) {
-        scanner = new Scanner(System.in);
+    public String randomWalk() {
         Random random = new Random();
         List<String> visitedNodes = new ArrayList<>();
         Set<String> visitedEdges = new HashSet<>();
-        // 随机选择一个起点
+        
+        // 随机选择起点
         List<String> nodes = new ArrayList<>(graph.getGraph().keySet());
+        if (nodes.isEmpty()) {
+            return ""; // 处理空图情况
+        }
         String currentNode = nodes.get(random.nextInt(nodes.size()));
         visitedNodes.add(currentNode);
     
-        System.out.println("开始随机游走，输入 'stop' 随时停止遍历。");
-    
         while (true) {
             Map<String, Integer> neighbors = graph.getGraph().get(currentNode);
+            
+            // 终止条件1: 没有出边
             if (neighbors == null || neighbors.isEmpty()) {
-                System.out.println("当前节点没有出边，随机游走结束。");
                 break;
             }
+            
+            // 选择下一个节点
             List<String> neighborList = new ArrayList<>(neighbors.keySet());
             String nextNode = neighborList.get(random.nextInt(neighborList.size()));
             String edge = currentNode + " -> " + nextNode;
+            
+            // 终止条件2: 出现重复边
             if (visitedEdges.contains(edge)) {
-                System.out.println("出现重复边，随机游走结束。");
                 break;
             }
+            
+            // 记录路径
             visitedEdges.add(edge);
             visitedNodes.add(nextNode);
-            System.out.println("当前路径: " + String.join(" -> ", visitedNodes));
-            System.out.print("输入 'stop' 停止遍历，按回车键继续: ");
-            String input = scanner.nextLine();
-            if ("stop".equalsIgnoreCase(input)) {
-                System.out.println("用户手动停止遍历。");
-                break;
-            }
             currentNode = nextNode;
         }
-    
-        // 将遍历的节点输出为文本，并以文件形式写入磁盘
+        
         writeVisitedNodesToFile(visitedNodes);
+
+        return String.join(" -> ", visitedNodes); // 返回遍历路径
     }
 }

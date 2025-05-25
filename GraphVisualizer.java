@@ -12,7 +12,7 @@ import java.util.Map;
 public class GraphVisualizer {
     private JFrame graphFrame;
 
-    public void visualizeGraph(TextGraph graph) {
+    public void showDirectedGraph(TextGraph graph) {
         graphFrame = new JFrame("文本有向图");
         // 设置窗口关闭时的操作，关闭窗口时释放资源
         graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
