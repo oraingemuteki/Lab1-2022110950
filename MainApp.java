@@ -81,7 +81,7 @@ public class MainApp {
                         }
                         break;
                     case 6:
-                        String walkPath = operations.randomWalk();
+                        String walkPath = operations.randomWalk(graph);
                         System.out.println("随机游走路径: " + walkPath);
     
                         // 可选：保留原文件保存功能

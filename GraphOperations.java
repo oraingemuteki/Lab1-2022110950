@@ -285,12 +285,11 @@ public class GraphOperations {
         }
     }
 
-    public String randomWalk() {
+    public String randomWalk(TextGraph graph) {
         Random random = new Random();
         List<String> visitedNodes = new ArrayList<>();
         Set<String> visitedEdges = new HashSet<>();
-        
-        // 随机选择起点
+
         List<String> nodes = new ArrayList<>(graph.getGraph().keySet());
         if (nodes.isEmpty()) {
             return ""; // 处理空图情况
@@ -300,18 +299,14 @@ public class GraphOperations {
     
         while (true) {
             Map<String, Integer> neighbors = graph.getGraph().get(currentNode);
-            
-            // 终止条件1: 没有出边
             if (neighbors == null || neighbors.isEmpty()) {
                 break;
             }
-            
-            // 选择下一个节点
+
             List<String> neighborList = new ArrayList<>(neighbors.keySet());
             String nextNode = neighborList.get(random.nextInt(neighborList.size()));
             String edge = currentNode + " -> " + nextNode;
-            
-            // 终止条件2: 出现重复边
+
             if (visitedEdges.contains(edge)) {
                 break;
             }
@@ -321,9 +316,7 @@ public class GraphOperations {
             visitedNodes.add(nextNode);
             currentNode = nextNode;
         }
-        
         writeVisitedNodesToFile(visitedNodes);
-
-        return String.join(" -> ", visitedNodes); // 返回遍历路径
+        return String.join(" -> ", visitedNodes);
     }
 }
