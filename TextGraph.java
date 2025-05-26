@@ -9,7 +9,7 @@ public class TextGraph {
 
     public void buildGraph(String filePath) throws Exception {
         List<String> words = processFile(filePath);
-        if (words.size() < 2) throw new IllegalArgumentException("文件需要包含至少两个单词");
+        // if (words.size() < 2) throw new IllegalArgumentException("文件需要包含至少两个单词");
         
         calculateTFIDF(words);
         // 将每个单词作为节点添加到图中
