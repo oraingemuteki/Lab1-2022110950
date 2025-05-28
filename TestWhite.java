@@ -1,5 +1,9 @@
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.Assert.*;
 
 public class TestWhite {
@@ -37,23 +41,37 @@ public class TestWhite {
     public void testSingleWordGraph() {
         String result = operations2.randomWalk(graph2);
         assertEquals("helloworld", result);
+//        assertTrue(judge(graph2, result));
     }
 
     @Test
     public void testMultipleWordGraph() {
         String result = operations3.randomWalk(graph3);
-        assertTrue(isValidPath(graph3, result));
+        assertTrue(judge(graph3, result));
     }
 
-    private boolean isValidPath(TextGraph graph, String path) {
+    private boolean judge(TextGraph graph, String path) {
         if (path.isEmpty()) return false;
 
         String[] nodes = path.split(" -> ");
-        for (int i = 0; i < nodes.length - 1; i++) {
-            String current = nodes[i];
-            String next = nodes[i + 1];
-            if (!graph.getGraph().get(current).containsKey(next)) {
-                return false;
+        Set<String> visitedEdges = new HashSet<>();
+
+        for (int i = 0; i < nodes.length; i++) {
+            if (nodes.length == 1) return true;
+
+            if (i < nodes.length - 1) {
+                String current = nodes[i];
+                String next = nodes[i + 1];
+                String edge = current + " -> " + next;
+
+                if (!graph.getGraph().get(current).containsKey(next)) {
+                    return false;
+                }
+
+                if (visitedEdges.contains(edge)) {
+                    return false;
+                }
+                visitedEdges.add(edge);
             }
         }
         return true;
